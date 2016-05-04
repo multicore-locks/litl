@@ -118,7 +118,8 @@ struct routine {
     void *arg;
 };
 
-// With this flag enabled, the mutex_destroy function will be called on each alive lock
+// With this flag enabled, the mutex_destroy function will be called on each
+// alive lock
 // at application exit (e.g., for printing statistics about a lock -- see
 // src/concurrency.c)
 #ifndef DESTROY_ON_EXIT

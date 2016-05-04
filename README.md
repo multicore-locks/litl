@@ -60,7 +60,7 @@ The library uses `LD_PRELOAD` to intercept calls to most of the `pthread_mutex_*
 | **HMCS** | [HMC] | original (spin) | hmcs | |
 | **HT-LOCK-EPFL** | [EVR] | original (spin) | hticket-ls | From libslock |
 | **HYS-HMCS** | [HYS] | original (spin) | ahmcs | |
-| **Malthusian** | [MAL] | spinlock or spin-then-park | malth_spin and malth_stp | This is the Malthusian-MCS version. Validated by the author -- thanks D.Dice |
+| **Malthusian** | [MAL] | spinlock or spin-then-park | malth_spin and malth_stp | This is the Malthusian-MCS version. |
 | **MCS** | [MCS] | spinlock or spin-then-park | mcs_spin and mcs_stp | From RCL |
 | **MCS-EPFL** | [MCS] | original (spin) | mcs-ls | From libslock |
 | **MCS-TP** | [PRE] | original (spin hybrid) | mcs-timepub | From RCL |
