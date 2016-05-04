@@ -77,6 +77,14 @@
 #include <hmcs.h>
 #elif defined(HYSHMCS)
 #include <hyshmcs.h>
+#elif defined(CBOMCS)
+#include <cbomcs.h>
+#elif defined(CPTLTKT)
+#include <cptltkt.h>
+#elif defined(CTKTTKT)
+#include <ctkttkt.h>
+#elif defined(PARTITIONED)
+#include <partitioned.h>
 #else
 #error "No lock algorithm known"
 #endif

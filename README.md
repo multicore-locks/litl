@@ -52,11 +52,11 @@ The library uses `LD_PRELOAD` to intercept calls to most of the `pthread_mutex_*
 | ---  | --- | --- | --- | --- |
 | **ALOCK-EPFL** | [AND] | original (spin) | alock-ls | From libslock |
 | **Backoff** | [MCS] | original (spin) | backoff | From concurrencykit |
-| **C-BO-MCS***| [COH] | spinlock or spin-then-park | c-bo-mcs_spin and c-bo-mcs_stp|  |
+| **C-BO-MCS**| [COH] | spinlock or spin-then-park | c-bo-mcs_spin and c-bo-mcs_stp|  |
 | **CLH** | [SYN] | spinlock of spin-then-park | clh_spin and clh_stp | |
 | **CLH-EPFL** | [SYN] | original (spin) | clh-ls | From libslock |
-| **C-PTL-TKT*** | [COH] | original (spin) | c-ptl-tkt | |
-| **C-TKT-TKT*** | [COH] | original (spin) | c-tkt-tkt | |
+| **C-PTL-TKT** | [COH] | original (spin) | c-ptl-tkt | |
+| **C-TKT-TKT** | [COH] | original (spin) | c-tkt-tkt | |
 | **HMCS** | [HMC] | original (spin) | hmcs | |
 | **HT-LOCK-EPFL** | [EVR] | original (spin) | hticket-ls | From libslock |
 | **HYS-HMCS** | [HYS] | original (spin) | ahmcs | |
@@ -64,7 +64,7 @@ The library uses `LD_PRELOAD` to intercept calls to most of the `pthread_mutex_*
 | **MCS** | [MCS] | spinlock or spin-then-park | mcs_spin and mcs_stp | From RCL |
 | **MCS-EPFL** | [MCS] | original (spin) | mcs-ls | From libslock |
 | **MCS-TP** | [PRE] | original (spin hybrid) | mcs-timepub | From RCL |
-| **Partitioned*** | [PAR] | original (spin) | partitioned | |
+| **Partitioned** | [PAR] | original (spin) | partitioned | |
 | **Pthread-Adaptive** | [ADP] | original (spin_then_park) | pthreadadapt | Wrapper around pthread lock with adaptive policy |
 | **Pthread-Interpose** | - | original (park) | pthread | Wrapper around classic pthread lock |
 | **Spinlock** | [SYN] | original (spin) | spinlock | |
@@ -75,8 +75,6 @@ The library uses `LD_PRELOAD` to intercept calls to most of the `pthread_mutex_*
 | **TTAS-EPFL** | [AND] | original (spin) | ttas-ls | From libslock |
 
 Note that the pthread-adaptive and pthread-interpose wrappers are provided only for fair comparison with the other algorithms (i.e., to introduce the same library interposition overhead).
-
-**The code of these locks is not publicly available for the moment due to possible patent restrictions.*
 
 ### Support for condition variables
 
