@@ -1,0 +1,43 @@
+--- a/phoenix-2.0/tests/histogram/histogram.c
++++ b/phoenix-2.0/tests/histogram/histogram.c
+@@ -72,8 +72,8 @@ void test_endianess() {
+ /* swap_bytes
+  *
+  */
+-void swap_bytes(char *bytes, int num_bytes) {
+-    int i;
++void swap_bytes(char *bytes, unsigned long long int num_bytes) {
++    unsigned long long int i;
+     char tmp;
+     
+     for (i = 0; i < num_bytes/2; i++) {
+@@ -109,7 +109,7 @@ int myshortcmp(const void *s1, const void *s2)
+  */
+ void hist_map(map_args_t *args) 
+ {
+-    int i;
++    unsigned long long int i;
+     short *key;
+     unsigned char *val;
+     intptr_t red[256];
+@@ -197,7 +197,7 @@ void *hist_combiner (iterator_t *itr)
+ int main(int argc, char *argv[]) {
+     
+     final_data_t hist_vals;
+-    int i;
++    unsigned long long int i;
+     int fd;
+     char *fdata;
+     struct stat finfo;
+@@ -257,8 +257,8 @@ int main(int argc, char *argv[]) {
+         swap_bytes((char *)(data_pos), sizeof(*data_pos));
+     }
+     
+-    int imgdata_bytes = (int)finfo.st_size - (int)(*(data_pos));
+-    printf("This file has %d bytes of image data, %d pixels\n", imgdata_bytes,
++    unsigned long long int imgdata_bytes = finfo.st_size - (*(data_pos));
++    printf("This file has %llu bytes of image data, %llu pixels\n", imgdata_bytes,
+                                                                                 imgdata_bytes / 3);
+     
+     // We use this global variable arrays to store the "key" for each histogram
+

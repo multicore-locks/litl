@@ -1,0 +1,144 @@
+--- a/sql/conn_handler/connection_handler_per_thread.cc
++++ b/sql/conn_handler/connection_handler_per_thread.cc
+@@ -28,6 +28,9 @@
+ #include "sql_parse.h"                   // do_command
+ #include "log.h"                         // Error_log_throttle
+ 
++#include <sys/syscall.h>
++#include <sys/socket.h>
++#include <sys/un.h>
+ 
+ // Initialize static members
+ ulong Per_thread_connection_handler::blocked_pthread_count= 0;
+@@ -60,7 +63,6 @@ static uint wake_pthread= 0;
+ */
+ static uint kill_blocked_pthreads_flag= 0;
+ 
+-
+ #ifdef HAVE_PSI_INTERFACE
+ static PSI_mutex_key key_LOCK_thread_cache;
+ 
+@@ -79,6 +81,70 @@ static PSI_cond_info all_per_thread_conds[]=
+ };
+ #endif
+ 
++#define METRIC 1
++#define REPORT_PIPE 0
++#define MAX_THREADS 1024
++#define PIPE_NAME                 "/tmp/progress_manual.pipe"
++
++#ifdef METRIC
++static int max_thread_id = 0;
++static __thread int current_thread_id = 0;
++static __thread int thread_init = 0;
++static ulong throughput[MAX_THREADS];
++
++static void* progress_thread_stats(void *args) 
++{
++    ulong last_throughput = 0;
++    int pipe_id = 0;
++#if REPORT_PIPE
++    // Communicate through unix socket
++    pipe_id = socket(PF_UNIX, SOCK_STREAM, 0);
++    if(pipe_id < 0) {
++      fprintf(stderr, "Unable to create the socket.\n");
++      exit(0);
++    }
++    
++    struct sockaddr_un addr;
++    memset(&addr, 0, sizeof(addr));
++    addr.sun_family = AF_UNIX;
++    strncpy(addr.sun_path, PIPE_NAME, sizeof(addr.sun_path)-1);
++
++    if(connect(pipe_id, (struct sockaddr *)&addr, sizeof(struct sockaddr_un)) != 0) {
++      fprintf(stderr, "Unable to connect to the socket.\n");
++      exit(0);
++    }
++#endif
++
++    const char *uniq_name = getenv("LOCKPROFILER_UNIQ_NAME");
++    if (uniq_name == NULL) {
++	uniq_name = "mysqld";
++    }
++
++    char str[1024];
++    int string_size;
++    int i;
++
++    while (1) {
++	sleep(1);
++	
++	// Get and reset counter atomically
++	last_throughput = 0;
++	for (i = 0; i < max_thread_id; i++) {
++	    last_throughput += throughput[i];
++	    throughput[i] = 0;
++	}
++
++	// Write to the pipe
++	string_size = snprintf(str, 1024, "%s,%llu\n", uniq_name, last_throughput);
++#if REPORT_PIPE
++	write(pipe_id, str, string_size);
++#endif
++	fprintf(stderr, "Last second throughput is %s", str);
++    }    
++
++    return NULL;
++}
++#endif
+ 
+ void Per_thread_connection_handler::init()
+ {
+@@ -96,6 +162,14 @@ void Per_thread_connection_handler::init()
+   mysql_cond_init(key_COND_flush_thread_cache, &COND_flush_thread_cache);
+   waiting_channel_info_list= new (std::nothrow) std::list<Channel_info*>;
+   DBUG_ASSERT(waiting_channel_info_list != NULL);
++
++  // Start the thread stats thread
++#ifdef METRIC
++  pthread_t tid;
++  if (pthread_create(&tid, NULL, progress_thread_stats, NULL) == 0) {
++      sql_print_error("Can't create thread to handle thread stats.");
++  }
++#endif
+ }
+ 
+ 
+@@ -246,6 +320,19 @@ extern "C" void *handle_connection(void *arg)
+   Channel_info* channel_info= static_cast<Channel_info*>(arg);
+   bool pthread_reused __attribute__((unused))= false;
+ 
++
++#ifdef METRIC
++    if (!thread_init) {
++	current_thread_id = __sync_fetch_and_add(&max_thread_id, 1);
++	if (current_thread_id > MAX_THREADS) {
++	    fprintf(stderr, "More thread than expected. Update MAX_THREADS\n");
++	exit(0);
++	}
++	throughput[current_thread_id] = 0;
++	thread_init = 1;
++    }
++#endif
++
+   if (my_thread_init())
+   {
+     connection_errors_internal++;
+@@ -295,8 +382,15 @@ extern "C" void *handle_connection(void *arg)
+       while (thd_is_connection_alive(thd))
+       {
+         mysql_audit_release(thd);
+-        if (do_command(thd))
+-          break;
++        if (do_command(thd)) {
++#ifdef METRIC
++	  throughput[current_thread_id] += 1;
++#endif
++	    break;
++	}
++#ifdef METRIC
++	throughput[current_thread_id] += 1;
++#endif
+       }
+       end_connection(thd);
+     }

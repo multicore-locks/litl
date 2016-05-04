@@ -1,0 +1,10 @@
+BasedOnStyle: llvm
+IndentWidth: 4
+AlignConsecutiveAssignments: true
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBraces: Attach
+Language: Cpp

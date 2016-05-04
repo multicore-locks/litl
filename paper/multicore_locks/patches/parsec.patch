@@ -1,0 +1,12 @@
+--- a/config/gcc.bldconf
++++ b/config/gcc.bldconf
+@@ -68,7 +68,8 @@
+ export MAKE="${GNUTOOL_HOME}/bin/${BINARY_PREFIX}make"
+
+ # Flags for increased portability of binaries
+ -PORTABILITY_FLAGS="-static-libgcc -Wl,--hash-style=both,--as-needed"
+ +#PORTABILITY_FLAGS="-static-libgcc -Wl,--hash-style=both,--as-needed"
+ +PORTABILITY_FLAGS="-Wl,--hash-style=both,--as-needed"
+
+ # Arguments to use
+  export CFLAGS=" -O3 -g -funroll-loops -fprefetch-loop-arrays ${PORTABILITY_FLAGS}"

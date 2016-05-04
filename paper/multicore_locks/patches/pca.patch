@@ -1,0 +1,127 @@
+--- a/phoenix-2.0/tests/pca/pca.c
++++ b/phoenix-2.0/tests/pca/pca.c
+@@ -35,6 +35,11 @@
+ #include <math.h>
+ #include <inttypes.h>
+ 
++#include <sys/syscall.h>
++#include <sys/socket.h>
++#include <sys/un.h>
++#include <pthread.h>
++
+ #include "stddefines.h"
+ #include "map_reduce.h"
+ 
+@@ -71,6 +76,70 @@ int num_rows;
+ int num_cols;
+ int grid_size;
+ 
++#define METRIC 1
++#define REPORT_PIPE 0
++#define MAX_THREADS 96
++#define PIPE_NAME                 "/tmp/progress_manual.pipe"
++
++#ifdef METRIC
++static int max_thread_id = 0;
++static __thread int current_thread_id = 0;
++static __thread int thread_init = 0;
++static ulong throughput[MAX_THREADS];
++
++static void* progress_thread_stats(void *args) 
++{
++    ulong last_throughput = 0;
++    int pipe_id = 0;
++#if REPORT_PIPE
++    // Communicate through unix socket
++    pipe_id = socket(PF_UNIX, SOCK_STREAM, 0);
++    if(pipe_id < 0) {
++      fprintf(stderr, "Unable to create the socket.\n");
++      exit(0);
++    }
++    
++    struct sockaddr_un addr;
++    memset(&addr, 0, sizeof(addr));
++    addr.sun_family = AF_UNIX;
++    strncpy(addr.sun_path, PIPE_NAME, sizeof(addr.sun_path)-1);
++
++    if(connect(pipe_id, (struct sockaddr *)&addr, sizeof(struct sockaddr_un)) != 0) {
++      fprintf(stderr, "Unable to connect to the socket.\n");
++      exit(0);
++    }
++#endif
++
++    const char *uniq_name = getenv("LOCKPROFILER_UNIQ_NAME");
++    if (uniq_name == NULL) {
++	uniq_name = "pca";
++    }
++    char str[1024];
++    int string_size;
++    int i;
++
++    while (1) {
++	sleep(1);
++	
++	// Get and reset counter atomically
++	last_throughput = 0;
++	for (i = 0; i < max_thread_id; i++) {
++	    last_throughput += throughput[i];
++	    throughput[i] = 0;
++	}
++
++	// Write to the pipe
++	string_size = snprintf(str, 1024, "%s,%llu\n", uniq_name, last_throughput);
++#if REPORT_PIPE
++	write(pipe_id, str, string_size);
++#endif
++	fprintf(stderr, "Last second throughput is %s", str);
++    }    
++
++    return NULL;
++}
++#endif
++
+ /** parse_args()
+  *  Parse the user arguments to determine the number of rows and colums
+  */  
+@@ -326,6 +395,18 @@ void *pca_cov_locator (map_args_t *task)
+  */
+ void pca_cov_map(map_args_t *args)
+ {
++#ifdef METRIC
++    if (!thread_init) {
++	current_thread_id = __sync_fetch_and_add(&max_thread_id, 1);
++	if (current_thread_id > MAX_THREADS) {
++	    fprintf(stderr, "More thread than expected. Update MAX_THREADS\n");
++	exit(0);
++	}
++	throughput[current_thread_id] = 0;
++	thread_init = 1;
++    }
++#endif
++
+     assert(args);
+     assert(args->length == 1);
+     int i, j;
+@@ -366,6 +447,9 @@ void pca_cov_map(map_args_t *args)
+         CHECK_ERROR((cov_loc = (pca_cov_loc_t *)malloc(sizeof(pca_cov_loc_t))) == NULL);
+         cov_loc->start_row = cov_data->cov_locs[i].start_row;
+         cov_loc->cov_row = cov_data->cov_locs[i].cov_row;
++#ifdef METRIC
++    throughput[current_thread_id] += 1;
++#endif
+         emit_intermediate((void *)cov_loc, (void *)covariance, sizeof(pca_cov_loc_t));
+     }
+     
+@@ -475,6 +559,12 @@ int main(int argc, char **argv)
+     
+     printf("PCA Cov: Calling MapReduce Scheduler\n");
+ 
++#ifdef METRIC
++#define MAGIC_NUMBER 0xdeedbeaf
++    pthread_t tid;
++    pthread_create(&tid, NULL, progress_thread_stats, (void*)MAGIC_NUMBER);
++#endif
++
+     get_time (&end);
+ 
+ #ifdef TIMING

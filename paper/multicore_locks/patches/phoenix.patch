@@ -1,0 +1,27 @@
+--- a/phoenix-2.0/src/processor.c
++++ b/phoenix-2.0/src/processor.c
+@@ -94,6 +94,11 @@ static cpu_set_t* proc_get_full_set(void)
+    Returns 0 if successful, -1 if failed. */
+ int proc_bind_thread (int cpu_id)
+ {
++    // Forbid thread binding
++    if (getenv("MAPRED_NO_BINDING") != NULL) {
++	return 0;
++    }
++
+ #ifdef _LINUX_
+     cpu_set_t   cpu_set;
+ 
+@@ -108,6 +113,11 @@ int proc_bind_thread (int cpu_id)
+ 
+ int proc_unbind_thread ()
+ {
++    // Forbid thread binding
++    if (getenv("MAPRED_NO_BINDING") != NULL) {
++	return 0;
++    }
++
+ #ifdef _LINUX_
+     return sched_setaffinity (0, sizeof (cpu_set_t), proc_get_full_set());
+ #elif defined (_SOLARIS_)
+
