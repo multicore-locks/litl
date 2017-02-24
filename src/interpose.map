@@ -1,12 +1,28 @@
 GLIBC_2.2.5 {
    global:
       pthread_create;
+      pthread_mutex_init;
       pthread_mutex_create;
       pthread_mutex_init;
       pthread_mutex_destroy;
       pthread_mutex_lock;
+      pthread_mutex_timedlock;
       pthread_mutex_trylock;
       pthread_mutex_unlock;
+      pthread_spin_init;
+      pthread_spin_destroy;
+      pthread_spin_lock;
+      pthread_spin_trylock;
+      pthread_spin_unlock;
+      pthread_rwlock_init;
+      pthread_rwlock_destroy;
+      pthread_rwlock_rdlock;
+      pthread_rwlock_wrlock;
+      pthread_rwlock_timedrdlock;
+      pthread_rwlock_timedwrlock;
+      pthread_rwlock_tryrdlock;
+      pthread_rwlock_trywrlock;
+      pthread_rwlock_unlock;
    local: *;
 };
 

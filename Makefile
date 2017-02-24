@@ -64,6 +64,7 @@ include/topology.h: include/topology.in
 	sed -i "s/@cpus@/$$(nproc)/g" $@
 	sed -i "s/@cachelinesize@/128/g" $@  # 128 bytes is advised by intel documentation to avoid false-sharing with the HW prefetcher
 	sed -i "s/@pagesize@/$$(getconf PAGESIZE)/g" $@
+	sed -i 's#@cpufreq@#'$$(cat /proc/cpuinfo | grep MHz | head -1 | awk '{ x = $$4/1000; printf("%0.2g", x); }')'#g' $@
 	chmod a+x $@
 
 

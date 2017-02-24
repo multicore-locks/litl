@@ -61,6 +61,7 @@ The library uses `LD_PRELOAD` to intercept calls to most of the `pthread_mutex_*
 | **HT-LOCK-EPFL** | [EVR] | original (spin) | hticket-ls | From libslock |
 | **HYS-HMCS** | [HYS] | original (spin) | ahmcs | |
 | **Malthusian** | [MAL] | spinlock or spin-then-park | malth_spin and malth_stp | This is the Malthusian-MCS version. |
+| **Mutexee** | [MUT] | original (spin_then_park) | mutexee | From lockin |
 | **MCS** | [MCS] | spinlock or spin-then-park | mcs_spin and mcs_stp | From RCL |
 | **MCS-EPFL** | [MCS] | original (spin) | mcs-ls | From libslock |
 | **MCS-TP** | [PRE] | original (spin hybrid) | mcs-timepub | From RCL |
@@ -195,8 +196,9 @@ Without that, the library is not able to get the function pointer address of the
 - [EVR] Tudor David, Rachid Guerraoui, and Vasileios Trigonakis. 2013. Everything you always wanted to know about synchronization but were afraid to ask. In Proceedings of the Twenty-Fourth ACM Symposium on Operating Systems Principles (SOSP '13).
 - [HMC] Milind Chabbi, Michael Fagan, and John Mellor-Crummey. 2015. High performance locks for multi-level NUMA systems. In Proceedings of the 20th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP 2015).
 - [HYS] Milind Chabbi and John Mellor-Crummey. 2016. Contention-conscious, locality-preserving locks. In Proceedings of the 21st ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming (PPoPP '16).
-- [LOC] Hugo Guiroux, Renaud Lachaize, and Vivien Quéma. 2016. Multicore Locks: the Case is Not Closed Yet. *To appear* (USENIX ATC'16).
+- [LOC] Hugo Guiroux, Renaud Lachaize, and Vivien Quéma. 2016. Multicore Locks: the Case is Not Closed Yet (USENIX ATC'16).
 - [MAL] Dave Dice. 2015. Malthusian Locks. In CoRR (arXiv).
+- [MUT] Babak Falsafi, Rachid Guerraoui, Javier Picorel, and Vasileios Trigonakis. 302+. Unlocking Energy (USENIX ATC'16).
 - [MCS] John M. Mellor-Crummey and Michael L. Scott. 1991. Algorithms for scalable synchronization on shared-memory multiprocessors. ACM Trans. Comput. Syst. 9, 1 (February 1991).
 - [PAR] David Dice. 2011. Brief announcement: a partitioned ticket lock. In Proceedings of the twenty-third annual ACM symposium on Parallelism in algorithms and architectures (SPAA '11)
 - [PRE] Bijun He, William N. Scherer, and Michael L. Scott. 2005. Preemption adaptivity in time-published queue-based spin locks. In Proceedings of the 12th international conference on High Performance Computing (HiPC'05)

@@ -28,6 +28,6 @@
 #define CPU_NUMBER                        @cpus@
 #define L_CACHE_LINE_SIZE                 @cachelinesize@
 #define PAGE_SIZE                         @pagesize@
-
+#define CPU_FREQ                          @cpufreq@
 
 #endif // __TOPOLOGY_H__
