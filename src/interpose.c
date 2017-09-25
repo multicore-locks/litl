@@ -238,10 +238,26 @@ int (*REAL(pthread_rwlock_unlock))(pthread_rwlock_t *lock)
 static void signal_exit(int signo);
 #endif
 
+volatile uint8_t init_spinlock = 0;
+
 static void __attribute__((constructor)) REAL(interpose_init)(void) {
 #if !(SUPPORT_WAITING) && !(defined(WAITING_ORIGINAL))
 #error "Trying to compile a lock algorithm with a generic waiting policy."
 #endif
+
+    // Init once, other concurrent threads wait
+    // 0 = not initiated
+    // 1 = initializing
+    // 2 = already initiated
+    uint8_t cur_init = __sync_val_compare_and_swap(&init_spinlock, 0, 1);
+    if (cur_init == 1) {
+        while (init_spinlock == 1) {
+            CPU_PAUSE();
+        }
+        return;
+    } else if (cur_init == 2) {
+        return;
+    }
 
     printf("Using Lib%s with waiting %s\n", LOCK_ALGORITHM, WAITING_POLICY);
 #if !NO_INDIRECTION
@@ -306,6 +322,9 @@ static void __attribute__((constructor)) REAL(interpose_init)(void) {
     LOAD_FUNC(pthread_rwlock_tryrdlock, 1, FCT_LINK_SUFFIX);
     LOAD_FUNC(pthread_rwlock_trywrlock, 1, FCT_LINK_SUFFIX);
     LOAD_FUNC(pthread_rwlock_unlock, 1, FCT_LINK_SUFFIX);
+
+    __sync_synchronize();
+    init_spinlock = 2;
 }
 static void __attribute__((destructor)) REAL(interpose_exit)(void) {
 #if DESTROY_ON_EXIT
@@ -523,7 +542,9 @@ __asm__(
 int pthread_spin_init(pthread_spinlock_t *spin,
                       int pshared) {
     DEBUG_PTHREAD("[p] pthread_spin_init\n");
-    REAL(interpose_init)();
+    if (init_spinlock != 2) {
+        REAL(interpose_init)();
+    }
 
 #if !NO_INDIRECTION
     ht_lock_create((void*)spin, NULL);
@@ -588,7 +609,9 @@ int pthread_spin_unlock(pthread_spinlock_t *spin) {
 int pthread_rwlock_init(pthread_rwlock_t *rwlock,
                         const pthread_rwlockattr_t *attr) {
     DEBUG_PTHREAD("[p] pthread_rwlock_init\n");
-    REAL(interpose_init)();
+    if (init_spinlock != 2) {
+        REAL(interpose_init)();
+    }
 
 #if !NO_INDIRECTION
     ht_lock_create((void*)rwlock, NULL);
