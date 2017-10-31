@@ -30,4 +30,4 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-LD_PRELOAD=$LD_PRELOAD:$BASE/lib/@lib@ $@
+LD_PRELOAD=$LD_PRELOAD:$BASE/lib/@lib@ "$@"
