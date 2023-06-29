@@ -39,7 +39,7 @@
  * is preempted.
  * Indeed, a thread A can overtake another thread B behind which it has been
  * waiting for a long time.
- * The waiting thread A will first yield its CPU (via pthread_yield) in order to
+ * The waiting thread A will first yield its CPU (via sched_yield) in order to
  * create an opportunity for the preempted thread (lock holder or B) to make
  * progress.
  * If this is not enough, T will overtake the predecessor thread (B) by marking
@@ -144,7 +144,7 @@ int mcs_tp_mutex_trylock(mcs_tp_mutex_t *impl, mcs_tp_node_t *me) {
             goto success;
         } else if (me->status == FAILED) {
             if (GET_TIME() - impl->cs_start_time > MAX_CS_TIME)
-                pthread_yield();
+                sched_yield();
 
             me->last_lock = impl;
             return EBUSY;
@@ -164,7 +164,7 @@ int mcs_tp_mutex_trylock(mcs_tp_mutex_t *impl, mcs_tp_node_t *me) {
             }
 
             if (GET_TIME() - impl->cs_start_time > MAX_CS_TIME)
-                pthread_yield();
+                sched_yield();
 
             me->last_lock = impl;
             return EBUSY;
