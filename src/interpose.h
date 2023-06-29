@@ -51,7 +51,9 @@
             fprintf(stderr, "WARNING: unable to find symbol: %s.\n", S(name)); \
     } while (0)
 
+#define GLIBC_2_2_5 "GLIBC_2.2.5"
 #define GLIBC_2_3_2 "GLIBC_2.3.2"
+#define GLIBC_2_34 "GLIBC_2.34"
 
 extern int (*REAL(pthread_mutex_init))(pthread_mutex_t *mutex,
                                        const pthread_mutexattr_t *attr);
