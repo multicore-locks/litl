@@ -35,3 +35,8 @@ GLIBC_2.3.2 {
       pthread_cond_wait;
       pthread_cond_timedwait;
 } GLIBC_2.2.5;
+
+GLIBC_2.34 {
+   global:
+      pthread_create;
+} GLIBC_2.3.2;
