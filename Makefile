@@ -16,12 +16,17 @@ export COND_VAR=1
 .SECONDARY: $(OBJS)
 .PHONY: all clean format
 
+all:
+ifeq ($(BUILD_MUSL), 1)
+all: musl_mutex $(DIR) include/topology.h $(SOS) $(SHS)
+else
 all: $(DIR) include/topology.h $(SOS) $(SHS)
+endif
 
 no_cond_var: COND_VAR=0
 no_cond_var: all
 
-%.so: obj/CLHT/libclht.a obj/
+%.so: musl_mutex obj/CLHT/libclht.a obj/
 	mkdir -p lib/
 	$(MAKE) -C src/ ../lib/$@
 
@@ -30,6 +35,9 @@ obj/:
 
 $(DIR):
 	mkdir -p $@
+
+musl_mutex:
+	$(MAKE) -C src/musl_mutex
 
 obj/CLHT:
 	cd obj/ && ([ -d CLHT ] || git clone https://github.com/HugoGuiroux/CLHT.git)
