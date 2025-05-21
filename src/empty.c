@@ -49,39 +49,48 @@ int empty_mutex_lock(empty_mutex_t *impl, empty_context_t *UNUSED(me)) {
 }
 
 int empty_mutex_trylock(empty_mutex_t *impl, empty_context_t *UNUSED(me)) {
+    // fprintf(stderr, "empty_mutex_trylock\n");
     return REAL(pthread_mutex_trylock)(impl);
 }
 void empty_mutex_unlock(empty_mutex_t *impl, empty_context_t *UNUSED(me)) {
+    // fprintf(stderr, "empty_mutex_unlock\n");
     REAL(pthread_mutex_unlock)(impl);
 }
 
 int empty_mutex_destroy(empty_mutex_t *lock) {
+    // fprintf(stderr, "empty_mutex_destroy\n");
     return REAL(pthread_mutex_destroy)(lock);
 }
 
 int empty_cond_init(empty_cond_t *cond, const pthread_condattr_t *attr) {
+    // fprintf(stderr, "empty_cond_init\n");
     return REAL(pthread_cond_init)(cond, attr);
 }
 
 int empty_cond_timedwait(empty_cond_t *cond, empty_mutex_t *lock,
                          empty_context_t *me, const struct timespec *ts) {
+    // fprintf(stderr, "empty_cond_timedwait\n");
     return REAL(pthread_cond_timedwait)(cond, lock, ts);
 }
 
 int empty_cond_wait(empty_cond_t *cond, empty_mutex_t *lock,
                     empty_context_t *UNUSED(me)) {
+    // fprintf(stderr, "empty_cond_wait\n");
     return REAL(pthread_cond_wait)(cond, lock);
 }
 
 int empty_cond_signal(empty_cond_t *cond) {
+    // fprintf(stderr, "empty_cond_signal\n");
     return REAL(pthread_cond_signal)(cond);
 }
 
 int empty_cond_broadcast(empty_cond_t *cond) {
+    // fprintf(stderr, "empty_cond_broadcast\n");
     return REAL(pthread_cond_broadcast)(cond);
 }
 
 int empty_cond_destroy(empty_cond_t *cond) {
+    // fprintf(stderr, "empty_cond_destroy\n");
     return REAL(pthread_cond_destroy)(cond);
 }
 
